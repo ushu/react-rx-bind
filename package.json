@@ -1,0 +1,9 @@
+{
+  "name": "rrx",
+  "version": "0.1.0",
+  "description": "React utilities for RxJS 6",
+  "main": "index.js",
+  "repository": "https://github.com/ushu/rrx",
+  "author": "Aurélien Noce <aurelien@noce.fr>",
+  "license": "MIT"
+}

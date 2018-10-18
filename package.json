@@ -2,13 +2,20 @@
   "name": "rrx",
   "version": "0.1.0",
   "description": "React utilities for RxJS 6",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "module": "ejs/index.js",
+  "unpkg": "umd/ma-lib.js",
+  "files": [
+    "lib",
+    "ejs",
+    "dist"
+  ],
   "repository": "https://github.com/ushu/rrx",
   "author": "Aurélien Noce <aurelien@noce.fr>",
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --write '*.{js,json}' 'src/*.ts'",
-    "prepare": "tsc --build tsconfig.json && tsc --build tsconfig.ejs.json"
+    "prepare": "tsc --build tsconfig.json && tsc --build tsconfig.ejs.json && rollup -c rollup.config.js"
   },
   "husky": {
     "hooks": {

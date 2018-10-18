@@ -60,7 +60,7 @@ export interface EventHandler<T> {
 export default function createEventHandler<T>(): EventHandler<T> {
   const subject = new Subject<T>()
   return {
-    handler: subject.emit.bind(subject),
+    handler: subject.next.bind(subject),
     stream: subject.asObservable(),
   }
 }

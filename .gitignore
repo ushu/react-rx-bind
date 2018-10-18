@@ -4,3 +4,4 @@ yarn-error*
 *.swp
 /lib
 /ejs
+/dist

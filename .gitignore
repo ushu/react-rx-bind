@@ -1,1 +1,4 @@
 node_modules
+yarn-error*
+.DS_Store
+*.swp

@@ -10,7 +10,7 @@ interface State {
   el: React.ReactNode | null
 }
 
-export function componentFromStream<P extends object>(
+export default function componentFromStream<P extends object>(
   mapper: StreamToNodeMapper<P>,
 ): React.ComponentType<P> {
   // a Subject of props

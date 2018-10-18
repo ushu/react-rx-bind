@@ -9,3 +9,4 @@ All notable changes to this project will be documented in this file.
 - add `componentFromStream`
 - add `createEventHandler`
 - add `bindPropStreams`
+- add `bindProps`

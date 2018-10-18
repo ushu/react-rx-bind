@@ -203,6 +203,39 @@ const ConnectedName = bindPropStreams(
 )(Name)
 ```
 
+### `bindProps`
+
+`bindProps` is a lower-lever version of `bindPropStreams` that expects an `Observable` of props and injects it into the child component.
+
+with tree shaking:
+
+```javascript
+import { bindProps } from "react-rxjs-utils"
+```
+
+or:
+
+```javascript
+import bindProps from "react-rxjs-utils/bindProps"
+```
+
+We can re-create the `Ticker` example above as follows:
+
+```javascript
+// a simple React component
+const Ticker = ({ tick }) => <h4>tick: {tick}</h4>
+
+// the same component, connected to a RxJS stream
+const tick$ = interval(1000)
+const injectedProps$ = tick$.pipe(
+  // we build an object of props to inject
+  map(tick => ({ tick })),
+)
+
+// and then we can "connect" the component
+const ConnectedTicker = bindProps(injectedProps$)(Ticker)
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details

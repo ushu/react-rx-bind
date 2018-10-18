@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Observable, combineLatest } from "rxjs"
 import { map, startWith } from "rxjs/operators"
-import componentFromStream from "./componentFromStream"
+import bindProps, { Binder } from "./bindProps"
 
 // Dervies an object type where all the values are Observables
 type PropStreams<T> = { [P in keyof T]: Observable<T[P]> }
@@ -13,14 +13,6 @@ type Omit<T, K extends keyof T> = Pick<
   ({ [P in keyof T]: P } &
     { [P in K]: never } & { [x: string]: never; [x: number]: never })[keyof T]
 >
-
-// the type returned by bindPropStreams: a function that takes a React component, and return the same components without
-// the injected props
-export interface Binder<InjectedProps extends object> {
-  <P extends InjectedProps>(
-    component: React.ComponentType<P>,
-  ): React.ComponentType<Omit<P, keyof InjectedProps>>
-}
 
 export default function bindPropStreams<Props extends object>(
   streams: PropStreams<Props>,
@@ -65,16 +57,5 @@ export default function bindPropStreams<Props extends object>(
     }),
   )
 
-  return <P extends Props>(component: React.ComponentType<P>) =>
-    componentFromStream<Omit<P, keyof Props>>(props$ =>
-      combineLatest(props$, injectedProps$).pipe(
-        // we take the input props, and merge them with the injected props
-        map(
-          ([props, injectedProps]) =>
-            Object.assign({}, props, injectedProps) as P,
-        ),
-        // and then instanciate the component
-        map(props => React.createElement(component, props)),
-      ),
-    )
+  return bindProps(injectedProps$)
 }

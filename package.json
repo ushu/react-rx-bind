@@ -7,7 +7,8 @@
   "author": "Aurélien Noce <aurelien@noce.fr>",
   "license": "MIT",
   "scripts": {
-    "prettier": "prettier --write '*.{js,json}' 'src/*.ts'"
+    "prettier": "prettier --write '*.{js,json}' 'src/*.ts'",
+    "prepare": "tsc --build tsconfig.cjs.json && tsc --build tsconfig.ejs.json"
   },
   "husky": {
     "hooks": {

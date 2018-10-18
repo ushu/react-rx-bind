@@ -1,8 +1,9 @@
 {
-  "name": "rrx",
+  "name": "react-rxjs-utils",
   "version": "0.1.0",
   "description": "React utilities for RxJS 6",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "module": "ejs/index.js",
   "unpkg": "umd/ma-lib.js",
   "files": [
@@ -10,12 +11,24 @@
     "ejs",
     "dist"
   ],
-  "repository": "https://github.com/ushu/rrx",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ushu/react-rxjs-utils.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ushu/react-rxjs-utils/issues"
+  },
+  "homepage": "https://github.com/ushu/react-rxjs-utils",
+  "keywords": [
+    "React",
+    "Rx"
+  ],
   "author": "Aurélien Noce <aurelien@noce.fr>",
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --write '*.{js,json}' 'src/*.ts'",
-    "prepare": "tsc --build tsconfig.json && tsc --build tsconfig.ejs.json && rollup -c rollup.config.js"
+    "build": "tsc --build tsconfig.json && tsc --build tsconfig.ejs.json && rollup -c rollup.config.js",
+    "clean": "rimraf lib ejs dist"
   },
   "husky": {
     "hooks": {
@@ -28,6 +41,7 @@
     "prettier": "^1.14.3",
     "pretty-quick": "^1.8.0",
     "react": "^16.5.2",
+    "rimraf": "^2.6.2",
     "rxjs": "^6.3.3",
     "typescript": "^3.1.3"
   },

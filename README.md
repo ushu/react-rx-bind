@@ -139,20 +139,20 @@ changeName.stream.subscribe({
 changeName.handler("test") // prints "test"
 ```
 
-### `bindPropStreams`
+### `bindProps`
 
-`bindPropStreams` subscribes to a set of streams and update the component props accordingly.
+`bindProps` subscribes to a set of streams and update the component props accordingly.
 
 with tree shaking:
 
 ```javascript
-import { bindPropStreams } from "react-rxjs-utils"
+import { bindProps } from "react-rxjs-utils"
 ```
 
 or:
 
 ```javascript
-import bindPropStreams from "react-rxjs-utils/bindPropStreams"
+import bindProps from "react-rxjs-utils/bindProps"
 ```
 
 A basic usage is to update the UI of a component from a set of live streams:
@@ -163,7 +163,7 @@ const Ticker = ({ tick }) => <h4>tick: {tick}</h4>
 
 // the same component, connected to a RxJS stream
 const tick$ = interval(1000)
-const ConnectedTicker = bindPropStreams({
+const ConnectedTicker = bindProps({
   // will inject a "tick" prop with the current value of "tick$"
   tick: tick$,
 })(Ticker)
@@ -182,7 +182,7 @@ This function can also be used to create Higher-Order components that inject a s
 const tick$ = interval(1000)
 
 // A HOC that injects the current "tick$" value
-const withTick = bindPropStreams({ tick: tick$ })
+const withTick = bindProps({ tick: tick$ })
 
 // example usage
 const Ticker = withTick(({ tick }) => <h4>tick: {tick}</h4>)
@@ -195,7 +195,7 @@ The function also supports _default values_ as an optional second argument:
 const name$ = of("John").pipe(delay(5000))
 
 const Name = ({ name }) => <span>My name is {name}</span>
-const ConnectedName = bindPropStreams(
+const ConnectedName = bindProps(
   // injects the "name" prop with the value of "name$"
   { name: name$ },
   // and defaults "name" to an initial value of "loading..."
@@ -203,20 +203,20 @@ const ConnectedName = bindPropStreams(
 )(Name)
 ```
 
-### `bindProps`
+### `bind`
 
-`bindProps` is a lower-lever version of `bindPropStreams` that expects an `Observable` of props and injects it into the child component.
+`bind` is a lower-lever version of `bindProps` that expects an `Observable` of props and injects it into the child component.
 
 with tree shaking:
 
 ```javascript
-import { bindProps } from "react-rxjs-utils"
+import { bind } from "react-rxjs-utils"
 ```
 
 or:
 
 ```javascript
-import bindProps from "react-rxjs-utils/bindProps"
+import bind from "react-rxjs-utils/bind"
 ```
 
 We can re-create the `Ticker` example above as follows:
@@ -233,7 +233,7 @@ const injectedProps$ = tick$.pipe(
 )
 
 // and then we can "connect" the component
-const ConnectedTicker = bindProps(injectedProps$)(Ticker)
+const ConnectedTicker = bind(injectedProps$)(Ticker)
 ```
 
 ## License

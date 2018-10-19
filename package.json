@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "module": "ejs/index.js",
-  "unpkg": "umd/ma-lib.js",
+  "unpkg": "dist/react-rxjs-utils-0.1.2.umd.js",
   "files": [
     "lib",
     "ejs",

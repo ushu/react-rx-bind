@@ -10,6 +10,23 @@ This package provides simple helpers for mixing React with RxJS 6.
 $ npm install react-rxjs-utils
 ```
 
+or
+
+```
+$ yarn add rect-rxjs-utils
+```
+
+There is also a UMD build for use in the browser.
+The minified version is available on _unpkg_ and defines a global `ReactRx` constant:
+
+```html
+<script src="https://unpkg.com/react-rxjs-utils@0.1.2/dist/react-rxjs-utils-0.1.2.umd.js"></script>
+<script>
+  const {bindProps} = ReactRx
+  // ...
+</script>
+```
+
 ### Usage
 
 ### `componentFromStream`

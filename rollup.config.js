@@ -9,9 +9,9 @@ export default {
   external: ["react", "rxjs", "rxjs/operators"],
   output: [
     {
-      file: `./dist/react-rxjs-utils-${version}.umd.js`,
+      file: `./dist/react-rx-bind-${version}.umd.js`,
       format: "umd",
-      name: "ReactRx",
+      name: "RxBind",
       globals: {
         react: "React",
         rxjs: "rxjs",

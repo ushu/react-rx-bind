@@ -1,33 +1,136 @@
-# Utilities for React and RxJS 6
+# Bind RxJS 6 stream as props on React components
 
-This package provides simple helpers for mixing React with RxJS 6.
-
-**NOTICE: for most use cases, you will probably be better served using the RxJS functions of [recompose]. I built this package to have a better support of RxJS 6 with TypeScript: unless you have faced the same issues, `react-rxjs-utils` might not be the best option.**
+This package provides simple helpers to inject RxJS stream values as props.
 
 ## Getting Started
 
 ```
-$ npm install react-rxjs-utils
+$ npm install react-rx-bind
 ```
 
 or
 
 ```
-$ yarn add rect-rxjs-utils
+$ yarn add rect-rx-bind
 ```
 
 There is also a UMD build for use in the browser.
-The minified version is available on _unpkg_ and defines a global `ReactRx` constant:
+The minified version is available on _unpkg_ and defines a global `RxBind` constant:
 
 ```html
-<script src="https://unpkg.com/react-rxjs-utils@0.1.2/dist/react-rxjs-utils-0.1.2.umd.js"></script>
+<script src="https://unpkg.com/react-rx-bind@0.3.0/dist/react-rx-bind-0.3.0.umd.js"></script>
 <script>
-  const {bindProps} = ReactRx
+  const {bind} = RxBind
   // ...
 </script>
 ```
 
 ### Usage
+
+### `bind`
+
+`bind` subscribes to a set of streams and update the component props accordingly.
+
+with tree shaking:
+
+```javascript
+import { bind } from "react-rx-bind"
+```
+
+or:
+
+```javascript
+import bind from "react-rx-bind/bind"
+```
+
+In the following example, we inject a `tick` prop containing the current tiker value:
+
+```javascript
+// a simple React component
+const Ticker = ({ tick }) => <h4>tick: {tick}</h4>
+
+// and a RxJS stream that ticks every second
+const tick$ = interval(1000)
+
+// Using the "bind" HOC we can inject the latest value of "tick$" into the "tick" prop
+const ConnectedTicker = bind({ tick: tick$ })(Ticker)
+
+// now we can use the connected component anywhere: it will substribe on mount and
+// unsubscribe on unmount automatically
+const App = () => (
+  <div>
+    <ConnectedTicker />
+  </div>
+)
+```
+
+This function can also be used to create custom Higher-Order Components that inject a set of props from named streams:
+
+```javascript
+const tick$ = interval(1000)
+
+// A HOC that injects the current "tick$" value
+const withTick = bind({ tick: tick$ })
+
+// usage:
+const Ticker = withTick(({ tick }) => <h4>tick: {tick}</h4>)
+```
+
+`bind` also supports _default values_ as an optional second argument:
+
+```javascript
+// a stream that emits "name", with a 5s delay
+const name$ = of("John").pipe(delay(5000))
+
+const Name = ({ name }) => <span>My name is {name}</span>
+const ConnectedName = bind(
+  // injects the "name" prop with the latest value from "name$"
+  { name: name$ },
+  // and defaults "name" to an initial value of "loading..."
+  { name: "loading..." },
+)(Name)
+```
+
+### `bindStream`
+
+`bindStream` is a lower-lever version of `bind` that expects an **`Observable` of props** and injects it into the child component.
+
+with tree shaking:
+
+```javascript
+import { bindStream } from "react-rx-bind"
+```
+
+or:
+
+```javascript
+import bindStream from "react-rx-bind/bindStream"
+```
+
+We can re-create the `Ticker` example above as follows:
+
+```javascript
+// the same React component
+const Ticker = ({ tick }) => <h4>tick: {tick}</h4>
+
+// and ticker obersable
+const tick$ = interval(1000)
+
+// now we create a stream of props
+const injectedProps$ = tick$.pipe(
+  // we build an object of props to inject, here it has only key: "tick"
+  map(tick => ({ tick })),
+)
+
+// and use bindStream "connect" the component
+const ConnectedTicker = bindStream(injectedProps$)(Ticker)
+```
+
+## Additional utility functions
+
+The functions describes above are used internally by the `bind` and `bindStream`, but might come useful in some situations.
+
+**NOTICE: for most use cases, you will probably be better served using utility functions from [recompose]. These utility functions are mostly present to avoid a dependency to [recompose] and use the same naming, but have less options than their original counterparts**
 
 ### `componentFromStream`
 
@@ -36,16 +139,16 @@ The minified version is available on _unpkg_ and defines a global `ReactRx` cons
 with tree shaking:
 
 ```javascript
-import { componentFromStream } from "react-rxjs-utils"
+import { componentFromStream } from "react-rx-bind/utils"
 ```
 
 or:
 
 ```javascript
-import componentFromStream from "react-rxjs-utils/componentFromStream"
+import componentFromStream from "react-rx-bind/utils/componentFromStream"
 ```
 
-This function builds a new React component, giving a stream of props (received from the parent React component) and expects a stream of React nodes (or JSX elements).
+Build a new React component using a callback that, given a stream of props (received from the parent React component) must output a stream of React nodes (or JSX elements).
 
 For example, given a stream of numbers, we might want to update the UI on each new value:
 
@@ -99,13 +202,13 @@ const TickComponent = componentFromStream<Props>(props$ =>
 with tree shaking:
 
 ```javascript
-import { createEventHandler } from "react-rxjs-utils"
+import { createEventHandler } from "react-rx-bind/utils"
 ```
 
 or:
 
 ```javascript
-import createEventHandler from "react-rxjs-utils/createEventHandler"
+import createEventHandler from "react-rx-bind/utils/createEventHandler"
 ```
 
 A typical use case would be to use the handler as an `onClick` listener:
@@ -156,102 +259,7 @@ changeName.stream.subscribe({
 changeName.handler("test") // prints "test"
 ```
 
-### `bindProps`
-
-`bindProps` subscribes to a set of streams and update the component props accordingly.
-
-with tree shaking:
-
-```javascript
-import { bindProps } from "react-rxjs-utils"
-```
-
-or:
-
-```javascript
-import bindProps from "react-rxjs-utils/bindProps"
-```
-
-A basic usage is to update the UI of a component from a set of live streams:
-
-```javascript
-// a simple React component
-const Ticker = ({ tick }) => <h4>tick: {tick}</h4>
-
-// the same component, connected to a RxJS stream
-const tick$ = interval(1000)
-const ConnectedTicker = bindProps({
-  // will inject a "tick" prop with the current value of "tick$"
-  tick: tick$,
-})(Ticker)
-
-// now we can use this component anywhere, without the need to provide the injected "tick" props:
-const App = () => (
-  <div>
-    <ConnectedTicker />
-  </div>
-)
-```
-
-This function can also be used to create Higher-Order components that inject a set of props from named streams:
-
-```javascript
-const tick$ = interval(1000)
-
-// A HOC that injects the current "tick$" value
-const withTick = bindProps({ tick: tick$ })
-
-// example usage
-const Ticker = withTick(({ tick }) => <h4>tick: {tick}</h4>)
-```
-
-The function also supports _default values_ as an optional second argument:
-
-```javascript
-// a stream that emits "name", with a 5s delay
-const name$ = of("John").pipe(delay(5000))
-
-const Name = ({ name }) => <span>My name is {name}</span>
-const ConnectedName = bindProps(
-  // injects the "name" prop with the value of "name$"
-  { name: name$ },
-  // and defaults "name" to an initial value of "loading..."
-  { name: "loading..." },
-)(Name)
-```
-
-### `bind`
-
-`bind` is a lower-lever version of `bindProps` that expects an `Observable` of props and injects it into the child component.
-
-with tree shaking:
-
-```javascript
-import { bind } from "react-rxjs-utils"
-```
-
-or:
-
-```javascript
-import bind from "react-rxjs-utils/bind"
-```
-
-We can re-create the `Ticker` example above as follows:
-
-```javascript
-// a simple React component
-const Ticker = ({ tick }) => <h4>tick: {tick}</h4>
-
-// the same component, connected to a RxJS stream
-const tick$ = interval(1000)
-const injectedProps$ = tick$.pipe(
-  // we build an object of props to inject
-  map(tick => ({ tick })),
-)
-
-// and then we can "connect" the component
-const ConnectedTicker = bind(injectedProps$)(Ticker)
-```
+## Development setup
 
 ## License
 
@@ -259,6 +267,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## TODO
 
-- [ ] Add docs & examples
+- [x] Add docs & examples
 
 [recompose]: https://github.com/acdlite/recompose

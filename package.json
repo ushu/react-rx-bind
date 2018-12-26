@@ -1,11 +1,11 @@
 {
-  "name": "react-rxjs-utils",
-  "version": "0.1.2",
-  "description": "React utilities for RxJS 6",
+  "name": "react-rx-bind",
+  "version": "0.3.0",
+  "description": "Connect RxJS 6 streams to React components",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "module": "ejs/index.js",
-  "unpkg": "dist/react-rxjs-utils-0.1.2.umd.js",
+  "unpkg": "dist/react-rx-bind-0.3.0.umd.js",
   "files": [
     "lib",
     "ejs",
@@ -13,12 +13,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ushu/react-rxjs-utils.git"
+    "url": "git+https://github.com/ushu/react-rx-bind.git"
   },
   "bugs": {
-    "url": "https://github.com/ushu/react-rxjs-utils/issues"
+    "url": "https://github.com/ushu/react-rx-bind/issues"
   },
-  "homepage": "https://github.com/ushu/react-rxjs-utils",
+  "homepage": "https://github.com/ushu/react-rx-bind",
   "keywords": [
     "React",
     "Rx"

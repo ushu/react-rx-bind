@@ -1,62 +1,102 @@
-import * as React from "react"
 import { Observable, combineLatest } from "rxjs"
 import { map, startWith } from "rxjs/operators"
-import componentFromStream from "./componentFromStream"
+import bindStream, { Binder } from "./bindStream"
 
-// Diff / Omit taken from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/react-redux/v5/index.d.ts
-// which itself took it from https://github.com/Microsoft/TypeScript/issues/12215#issuecomment-311923766
-type Omit<T, K extends keyof T> = Pick<
-  T,
-  ({ [P in keyof T]: P } &
-    { [P in K]: never } & { [x: string]: never; [x: number]: never })[keyof T]
->
-
-// the type returned by bindPropStreams: a function that takes a React component, and return the same components without
-// the injected props
-export interface Binder<InjectedProps extends object> {
-  <P extends InjectedProps>(
-    component: React.ComponentType<P>,
-  ): React.ComponentType<Omit<P, keyof InjectedProps>>
-}
+// Dervies an object type where all the values are Observables
+type PropStreams<T> = { [P in keyof T]: Observable<T[P]> }
 
 /**
- Injects props from a "stream of props" into a React component.
-
- @param injectedProps an `Observable` emitting `object`s injected as the component props.
- @returns a HOC injecting the props form `injectedProps$` to the provided component.
-
+ Subscribes to a set of RxJS streams (`Observable`s) and expose their current value as props to the React component.
+ 
+ @param streams an object whos keys as `string`s and values `Observable`s
+ @param defaultValues an optional object with the same keys as `streams` and holding default values for the injected props.
+ @returns a "binder" HOC, that takes any React components and inject it with the provided props.
+ 
  @example
 
  ```
- // given a RxJS stream of props
+ // given a stream
  const tick$ = interval(1000)
- const props$ = tick$.pipe(
-   map(tick => ({
-     tick,
-   }))
- )
 
  // and a React component
  const Ticker = ({ tick }) => <h4>tick: {tick}</h4>
 
- // bind will create a new component, with the "tick" value injected
- const withTick = bind(props$)
+ // bind can inject the stream values as a props
+ const withTick = bind({ tick: tick$ })
  const ConnectedTicker = withTick(Ticker)
+
+ // the ConnectedTicker component has no required props: "tick" is injected 
+ class App extends React.Component {
+   //...
+   renderTicker() {
+     return <ConnectedTicker />
+   }
+   //...
+ }
+ ```
+
+ @example
+
+ ```
+ // when one of the streams has no "current value"
+ const tick$ = interval(1000)
+ const delayedTick$ = tick$.pipe(delay(5000))
+
+ // you can provide default values for the props
+ const Ticker = bind({
+   tick1: tick$,
+   tick2: delayedTick$,
+ }, {
+   // default value for the delayed prop, until it emits
+   tick2: 0
+ })(
+   ({tick1, tick2}) => <h4>ticks: {tick1} & {tick2}</h4>
+ )
  ```
  */
+
 export default function bind<Props extends object>(
-  injectedProps$: Observable<Props>,
+  streams: PropStreams<Props>,
+  defaultValues?: Partial<Props>,
 ): Binder<Props> {
-  return <P extends Props>(component: React.ComponentType<P>) =>
-    componentFromStream<Omit<P, keyof Props>>(props$ =>
-      combineLatest(props$, injectedProps$).pipe(
-        // we take the input props, and merge them with the injected props
-        map(
-          ([props, injectedProps]) =>
-            Object.assign({}, props, injectedProps) as P,
-        ),
-        // and then instanciate the component
-        map(props => React.createElement(component, props)),
-      ),
-    )
+  // the input is an object where all values as Observables
+  const propNames = Object.keys(streams)
+  let propStreams = Object.values(streams) as Array<Observable<any>>
+
+  // add defaults (when applicable)
+  // -> we simply derive a new stream using the startWith() operator, when applicable
+  if (defaultValues) {
+    propStreams = propStreams.map((stream, index) => {
+      // @ts-ignore
+      const defaultValue = defaultValues[index]
+      return defaultValues ? stream.pipe(startWith(defaultValue)) : stream
+    })
+  }
+
+  // we build a single Observable returning objects with the same keys as streams,
+  // but the last value instead of the stream.
+  //
+  // if "streams" has signature:
+  //    {
+  //       isAdmin: Observable<boolean>
+  //       count:   Observable<number>
+  //    }
+  //
+  // the injectedProps$ will be an emit the last values, such as:
+  //
+  //   { isAdmin: true, count: 0 }
+  //   { isAdmin: true, count: 1 }
+  //   ...
+  //
+  const injectedProps$: Observable<Props> = combineLatest(...propStreams).pipe(
+    map(arrayOfProps => {
+      const props: any = []
+      for (let i = 0; i < propNames.length; ++i) {
+        props[propNames[i]] = arrayOfProps[i]
+      }
+      return props as Props
+    }),
+  )
+
+  return bindStream(injectedProps$)
 }

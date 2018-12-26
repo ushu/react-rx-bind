@@ -1,5 +1,5 @@
-// Re-export all the sub-components
-export { default as componentFromStream } from "./componentFromStream"
-export { default as createEventHandler } from "./createEventHandler"
-export { default as bindProps } from "./bindProps"
+// Re-export all the core function
 export { default as bind } from "./bind"
+export { default as bindStream } from "./bindStream"
+// and also the utilities
+export { componentFromStream, createEventHandler } from "./utils"

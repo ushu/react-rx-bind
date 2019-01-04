@@ -86,5 +86,5 @@ export default function bind<Props extends object>(
     }),
   )
 
-  return bindStream(injectedProps$, defaultValues)
+  return bindStream<Props>(injectedProps$, defaultValues)
 }

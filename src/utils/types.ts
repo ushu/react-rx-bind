@@ -10,11 +10,17 @@ export type Omit<T, K extends keyof T> = Pick<
 
 // the type returned by bind & bindStream: a function that takes a React component, and return the same components without
 // the injected props
-export interface Binder<InjectedProps extends object> {
+export interface Binder<InjectedProps extends object, ExternalProps = {}> {
   <P extends InjectedProps>(
     component: React.ComponentType<P>,
-  ): React.ComponentType<Omit<P, keyof InjectedProps>>
+  ): React.ComponentType<Omit<P, keyof InjectedProps> & ExternalProps>
 }
 
 // Derives an object type where all the values are Observables
 export type PropStreams<T> = { [P in keyof T]: Observable<T[P]> }
+
+// Derives the stream of props from the
+export type DynamicStream<
+  Props extends object,
+  ExternalProps extends object
+> = (props$: Observable<ExternalProps>) => Observable<Props>

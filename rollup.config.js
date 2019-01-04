@@ -1,10 +1,9 @@
-import typescript from "rollup-plugin-typescript"
 import { uglify } from "rollup-plugin-uglify"
 import commonjs from "rollup-plugin-commonjs"
 import { version } from "./package.json"
 
 export default {
-  input: "./src/index.ts",
+  input: "./lib/index.js",
 
   external: ["react", "rxjs", "rxjs/operators"],
   output: [
@@ -20,5 +19,5 @@ export default {
     },
   ],
 
-  plugins: [typescript(), commonjs({ extensions: [".js", ".ts"] }), uglify()],
+  plugins: [commonjs({ extensions: [".js", ".ts"] }), uglify()],
 }

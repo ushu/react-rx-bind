@@ -1,9 +1,7 @@
 import { Observable, combineLatest } from "rxjs"
 import { map, startWith } from "rxjs/operators"
-import bindStream, { Binder } from "./bindStream"
-
-// Dervies an object type where all the values are Observables
-type PropStreams<T> = { [P in keyof T]: Observable<T[P]> }
+import bindStream from "./bindStream"
+import { Binder, PropStreams } from "./utils/types"
 
 /**
  Subscribes to a set of RxJS streams (`Observable`s) and expose their current value as props to the React component.

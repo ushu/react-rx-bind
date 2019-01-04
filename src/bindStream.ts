@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Observable, combineLatest } from "rxjs"
-import { map } from "rxjs/operators"
+import { map, startWith } from "rxjs/operators"
 import componentFromStream from "./utils/componentFromStream"
 import { Omit, Binder } from "./utils/types"
 
@@ -31,7 +31,14 @@ import { Omit, Binder } from "./utils/types"
  */
 export default function bindStream<Props extends object>(
   injectedProps$: Observable<Props>,
+  defaultValues?: Props,
 ): Binder<Props> {
+  // add defaults (when applicable)
+  // -> we simply derive a new stream using the startWith() operator, when applicable
+  if (defaultValues) {
+    injectedProps$ = injectedProps$.pipe(startWith(defaultValues))
+  }
+
   return <P extends Props>(component: React.ComponentType<P>) =>
     componentFromStream<Omit<P, keyof Props>>(props$ =>
       combineLatest(props$, injectedProps$).pipe(

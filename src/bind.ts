@@ -1,5 +1,5 @@
 import { Observable, combineLatest } from "rxjs"
-import { map, startWith } from "rxjs/operators"
+import { map } from "rxjs/operators"
 import bindStream from "./bindStream"
 import { Binder, PropStreams } from "./utils/types"
 
@@ -55,21 +55,11 @@ import { Binder, PropStreams } from "./utils/types"
 
 export default function bind<Props extends object>(
   streams: PropStreams<Props>,
-  defaultValues?: Partial<Props>,
+  defaultValues?: Props,
 ): Binder<Props> {
   // the input is an object where all values as Observables
   const propNames = Object.keys(streams)
-  let propStreams = Object.values(streams) as Array<Observable<any>>
-
-  // add defaults (when applicable)
-  // -> we simply derive a new stream using the startWith() operator, when applicable
-  if (defaultValues) {
-    propStreams = propStreams.map((stream, index) => {
-      // @ts-ignore
-      const defaultValue = defaultValues[index]
-      return defaultValues ? stream.pipe(startWith(defaultValue)) : stream
-    })
-  }
+  const propStreams = Object.values(streams) as Array<Observable<any>>
 
   // we build a single Observable returning objects with the same keys as streams,
   // but the last value instead of the stream.
@@ -86,7 +76,7 @@ export default function bind<Props extends object>(
   //   { isAdmin: true, count: 1 }
   //   ...
   //
-  const injectedProps$: Observable<Props> = combineLatest(...propStreams).pipe(
+  let injectedProps$: Observable<Props> = combineLatest(...propStreams).pipe(
     map(arrayOfProps => {
       const props: any = []
       for (let i = 0; i < propNames.length; ++i) {
@@ -96,5 +86,5 @@ export default function bind<Props extends object>(
     }),
   )
 
-  return bindStream(injectedProps$)
+  return bindStream(injectedProps$, defaultValues)
 }
